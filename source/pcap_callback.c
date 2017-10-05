@@ -13,18 +13,18 @@ void pcap_callback(u_char * user, const struct  pcap_pkthdr *h, const u_char *by
 
 	// To ensure that the package was completely captured
 	if ((h->caplen) == (h->len)){
-		ether_reader(bytttes, h->len);
+		ether_reader(bytes, h->len);
 	}
 }
 
-void print_time(strutc timeval tv)
+void print_time(struct timeval tv)
 {
 	time_t time;
 	struct  tm *local_time;
 	char time_str[64];
 
 	time = tv.tv_sec;
-	local_time = local_time(&time);
+	local_time = localtime(&time);
 
 	strftime(time_str, sizeof(time_str), "%d-%m-%Y (%H:%M:%S", local_time);
 	printf("%s.%06ld)\n", time_str, tv.tv_usec);

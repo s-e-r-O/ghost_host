@@ -1,5 +1,6 @@
 #include <net/ethernet.h>
 #include <netinet/ether.h>
+#include <arpa/inet.h>
 
 #include "recv.h"
 
@@ -8,7 +9,7 @@
 void ether_reader(const u_char *bytes, bpf_u_int32 data_len)
 {
 	struct ether_header *headerEthernet = (struct ether_header *) bytes;
-	  
+
 	switch(ntohs(headerEthernet->ether_type)){
 		case ETHERTYPE_IP:
 			// Trying to find an ICMP package
