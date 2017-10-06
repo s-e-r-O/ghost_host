@@ -9,7 +9,7 @@ void print_time(struct timeval tv);
 
 void pcap_callback(u_char * user, const struct  pcap_pkthdr *h, const u_char *bytes)
 {
-	print_time(h->ts);
+	//print_time(h->ts);
 
 	// To ensure that the package was completely captured
 	if ((h->caplen) == (h->len)){
