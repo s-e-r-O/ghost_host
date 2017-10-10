@@ -34,6 +34,20 @@ void arp_reader(const u_char *bytes, bpf_u_int32 total_len)
 		case ARPOP_REQUEST:
 			printf("Who has %s? ", inet_ntoa(*(struct in_addr*) payloadARP->ar_tip));
 			printf("Tell %s\n", inet_ntoa(*(struct in_addr*) payloadARP->ar_sip));
+
+			// TO-DO: Find a way to make "ghost host address" from main.c reach this point in execution
+			/* 
+				0x0A1EFEA9 = 10.30.254.169 (For tests purposes only)
+		
+				For some reason, the *(uint32_t *) cast inverts the original address (169.254.30.10).
+				Anyways, this is only for tests purposes.
+			*/
+
+			if (*(uint32_t *)payloadARP->ar_tip == 0x0A1EFEA9) {
+				// Someone is asking for our ghost host
+				printf("Someone is asking for our ghost host\n");
+			}
+
 			break;
 		case ARPOP_REPLY:
 			printf("%s is at %s\n", inet_ntoa(*(struct in_addr*) payloadARP->ar_sip), ether_ntoa((struct ether_addr*) payloadARP->ar_sha));
