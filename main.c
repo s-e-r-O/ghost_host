@@ -3,19 +3,19 @@
 #include <pcap/pcap.h>
 #include <net/ethernet.h>
 
+#include "ghost_host.h"
 #include "recv.h"
 
 int main(int nargs, char* args[])
 {
-    uint32_t host_ip_addr; // IP address for the ghost host. It has to be in the same net as requesting hosts.
-    uint8_t host_hrd_addr[ETH_ALEN]; // MAC address for the ghost host.
+    struct g_host ghost_host; 
 
     if (nargs > 1) {
         /*
             TO-DO: Turn 'char* args[1]' into a uint32_t (check existence of a function for that in net libs),
             for now, 169.254.30.10 will be hardcoded :(                   
         */
-        host_ip_addr = 0xA9FE1E0A; //169.254.30.10
+        ghost_host.ip_addr = 0xA9FE1E0A; //169.254.30.10
 	    printf("Ghost Host IP Address: %s\n", args[1]);
     } else {
         char host_ip_addr_str[16];
@@ -25,7 +25,7 @@ int main(int nargs, char* args[])
             TO-DO: Turn 'char* host_ip_addr_str' into a uint32_t (check existence of a function for that in net libs),
             for now, 169.254.30.10 will be hardcoded :(                   
         */
-        host_ip_addr = 0xA9FE1E0A;
+        ghost_host.ip_addr = 0xA9FE1E0A;
     }
 
     /* errbuf is a char buffer used by libpcap to store error messages */
@@ -55,7 +55,10 @@ int main(int nargs, char* args[])
     }
 
     printf("Starting to capture...\n");
-    /* Proccessing packets of p until an ending condition occurs, with the routine pcap_callback  */
-    pcap_loop(p, -1, pcap_callback, NULL);
+    /* 
+        Proccessing packets of p until an ending condition occurs, with the routine pcap_callback 
+        and sending ghost_host data to it.
+    */
+    pcap_loop(p, -1, pcap_callback, (u_char*) &ghost_host);
     exit(0);
 }

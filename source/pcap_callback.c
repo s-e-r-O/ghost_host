@@ -3,13 +3,15 @@
 #include <time.h>
 
 #include "recv.h"
-
+#include "ghost_host.h"
 /* Print timeval struct in human-readable form */
 void print_time(struct timeval tv);
 
-void pcap_callback(u_char * user, const struct  pcap_pkthdr *h, const u_char *bytes)
+void pcap_callback(u_char *user, const struct  pcap_pkthdr *h, const u_char *bytes)
 {
 	//print_time(h->ts);
+	
+	struct g_host *ghost_host = (struct g_host *) user;
 
 	// To ensure that the package was completely captured
 	if ((h->caplen) == (h->len)){
