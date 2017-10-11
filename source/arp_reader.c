@@ -50,7 +50,8 @@ void arp_reader(const u_char *bytes, bpf_u_int32 total_len)
 
 			break;
 		case ARPOP_REPLY:
-			printf("%s is at %s\n", inet_ntoa(*(struct in_addr*) payloadARP->ar_sip), ether_ntoa((struct ether_addr*) payloadARP->ar_sha));
+			printf("%s is at ", inet_ntoa(*(struct in_addr*) payloadARP->ar_sip));
+			printf("%s\n", ether_ntoa((struct ether_addr*) payloadARP->ar_sha));
 			break;
 	}
 	
