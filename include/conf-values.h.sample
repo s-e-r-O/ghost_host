@@ -1,0 +1,6 @@
+// Copy this file as conf-values.h with the values specified for your configuration
+// DO NOT post this file in the git respository
+
+#define CONF_DEVICE "wlan0"
+#define GHOST_IP_ADDR "192.168.0.240"
+#define GHOST_HRD_ADDR "AA:BB:CC:DD:EE:FF"

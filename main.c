@@ -2,14 +2,16 @@
 #include <stdlib.h>
 #include <pcap/pcap.h>
 #include <net/ethernet.h>
+#include <libnet.h>
 
-#include "ghost_host.h"
+#include "conf-data.h"
+#include "conf-values.h"
 #include "recv.h"
 
 int main(int nargs, char* args[])
 {
-    struct g_host ghost_host; 
-
+    struct configuration conf_data; 
+#if 0
     if (nargs > 1) {
         /*
             TO-DO: Turn 'char* args[1]' into a uint32_t (check existence of a function for that in net libs),
@@ -27,29 +29,36 @@ int main(int nargs, char* args[])
         */
         ghost_host.ip_addr = 0xA9FE1E0A;
     }
-
+#endif
     /* errbuf is a char buffer used by libpcap to store error messages */
-    char errbuf[PCAP_ERRBUF_SIZE];
+    char errbuf[LIBNET_ERRBUF_SIZE];
     
+    const char *device = CONF_DEVICE;
 
-    printf("Looking up for devices...\n");
-    /* lookupdev will return the name of the first network device found for capturing packages */
-    char *device = pcap_lookupdev(errbuf);
+    printf("Initializing libnet with device: %s\n", device);
+    conf_data.l = libnet_init(LIBNET_LINK, device, errbuf);
 
-    if(device == NULL){
-        perror(errbuf);
-        exit(-1);
+    if (conf_data.l == NULL){
+        printf("libnet_init() failed: %s\n", errbuf);
+        exit(EXIT_FAILURE);
     }
 
-    printf("Opening %s...\n", device);
+    printf("Creating GHOST HOST data\n");
+    int hrd_addr_length = 6;
+    conf_data.ghost_host.ip_addr = libnet_name2addr4(conf_data.l, GHOST_IP_ADDR, LIBNET_DONT_RESOLVE);
+    conf_data.ghost_host.hrd_addr = libnet_hex_aton(GHOST_HRD_ADDR, &hrd_addr_length);
 
     /* 
         Opening network device with BUFSIZ as the snapshot length, in promiscuous mode
         and with a timeout of 5000 ms
     */
-    pcap_t* p = pcap_open_live(device, BUFSIZ, 1, 5000, errbuf);
 
-    if (p == NULL){
+    printf("Opening %s...\n", device);
+
+    printf("Initializing libpcap...\n");
+    conf_data.p = pcap_open_live(device, BUFSIZ, 1, 5000, errbuf);
+
+    if (conf_data.p == NULL){
         perror(errbuf);
         exit(-1);
     }
@@ -59,6 +68,6 @@ int main(int nargs, char* args[])
         Proccessing packets of p until an ending condition occurs, with the routine pcap_callback 
         and sending ghost_host data to it.
     */
-    pcap_loop(p, -1, pcap_callback, (u_char*) &ghost_host);
+    pcap_loop(conf_data.p, -1, pcap_callback, (u_char*) &conf_data);
     exit(0);
 }

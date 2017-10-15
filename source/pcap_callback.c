@@ -2,8 +2,9 @@
 #include <stdio.h>
 #include <time.h>
 
+#include "conf-data.h"
 #include "recv.h"
-#include "ghost_host.h"
+
 /* Print timeval struct in human-readable form */
 void print_time(struct timeval tv);
 
@@ -11,8 +12,13 @@ void pcap_callback(u_char *user, const struct  pcap_pkthdr *h, const u_char *byt
 {
 	//print_time(h->ts);
 	
-	struct g_host *ghost_host = (struct g_host *) user;
+	struct configuration *conf_data = (struct configuration *) user;
 
+
+	u_int8_t *ip_addr_p = (u_int8_t*)(&(conf_data->ghost_host.ip_addr));
+
+    printf("Address read: %d.%d.%d.%d\n", ip_addr_p[0],\
+        ip_addr_p[1], ip_addr_p[2], ip_addr_p[3]);
 	// To ensure that the package was completely captured
 	if ((h->caplen) == (h->len)){
 		ether_reader(bytes, h->len);
