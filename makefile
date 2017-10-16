@@ -2,7 +2,7 @@ CC = gcc
 IDIR = ./include
 CFLAGS = -I$(IDIR) -std=gnu99
 LIBS = -lnet -lpcap
-OBJ = main.c ./source/*.c
+OBJ = main.c ./source/init/*.c ./source/handlers/*.c
 DEPS = $(IDIR)/*
 
 ghost_host: $(OBJ)

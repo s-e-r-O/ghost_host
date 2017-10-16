@@ -10,15 +10,12 @@ int ip_handler(const u_char *bytes, struct configuration *conf_data)
 {
     struct ip *headerIP = (struct ip *) bytes;
     
-	// 'send' will determinate if a package injection is needed
-    int send = 0;
+	/* 
+		'send' will determinate if a package injection is needed
+    	'send' will be true if the package contains an ICMP echo request for our ghost IP address
+	*/
+	int send = icmp_handler(bytes + headerIP -> ip_hl * 4, ntohs(headerIP->ip_len) - headerIP -> ip_hl * 4, conf_data);
     
-    // Checking if the encapsulated protocol is ICMP
-    if (headerIP->ip_p == IPPROTO_ICMP){
-		// 'send' will be true if the package contains an ICMP echo request for our ghost IP address
-	    send = icmp_handler(bytes + headerIP -> ip_hl * 4, ntohs(headerIP->ip_len) - headerIP -> ip_hl * 4, conf_data);
-    }
-
     if (send){
 		extern libnet_ptag_t ip_tag;
 		ip_tag = libnet_build_ipv4(	ntohs(headerIP->ip_len),  			// Total Packet Length (from IP POV)

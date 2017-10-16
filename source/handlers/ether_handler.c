@@ -16,43 +16,37 @@ int ether_handler(const u_char *bytes, bpf_u_int32 total_len, struct configurati
 	int send = 0;
 
 	static u_int16_t last_ethertype = 0x0000; // Initial value isn't ETHERTYPE_IP nor ETHERTYPE_ARP
-	
+
 	switch(ntohs(headerEthernet->ether_type)){
 		case ETHERTYPE_IP:
 
-			// Checking if the possible ICMP package is directed to our ghost host
-			if (*headerEthernet->ether_dhost == *conf_data->ghost_host.hrd_addr){
+			/* 
+				We can't modify the injected packet if it was initizialized as an ARP package, 
+				instead we have to clear it, and build it from the ground up,
+			*/
+
+			/* <<<<<WARNING - NOT THE PRETTIEST WAY TO DO THIS! */
+			if (last_ethertype != ETHERTYPE_IP){
+				libnet_clear_packet(conf_data->l);
 				
-				/* 
-					We can't modify the injected packet if it was initizialized as an ARP package, 
-					instead we have to clear it, and build it from the beggining,
-				*/
-
-				/* <<<<<WARNING - NOT THE PRETTIEST WAY TO DO THIS! */
-				if (last_ethertype != ETHERTYPE_IP){
-					libnet_clear_packet(conf_data->l);
-
-					last_ethertype = ETHERTYPE_IP;
+				last_ethertype = ETHERTYPE_IP;
 					
-					extern libnet_ptag_t ether_tag;
-					ether_tag = LIBNET_PTAG_INITIALIZER;
+				extern libnet_ptag_t ether_tag;
+				ether_tag = LIBNET_PTAG_INITIALIZER;
 					
-					extern libnet_ptag_t arp_tag;
-					arp_tag = LIBNET_PTAG_INITIALIZER;
-				}
-				/* NOT THE PRETTIEST WAY TO DO THIS! - WARNING>>>>>> */
-				
-				// 'send' will be true if the package contains an ICMP echo request for our ghost IP address
-				send = ip_handler(bytes + sizeof(*headerEthernet), conf_data);
-
+				extern libnet_ptag_t arp_tag;
+				arp_tag = LIBNET_PTAG_INITIALIZER;
 			}
-
+			/* NOT THE PRETTIEST WAY TO DO THIS! - WARNING>>>>>> */
+				
+			// 'send' will be true if the package contains an ICMP echo request for our ghost IP address
+			send = ip_handler(bytes + sizeof(*headerEthernet), conf_data);
 			break;
 
 		case ETHERTYPE_ARP:
 			/* 
 				We can't modify the injected packet if it was initizialized as an ICMP package, 
-				instead we have to clear it, and build it from the beggining,
+				instead we have to clear it, and build it from the ground up,
 			*/
 			
 			/* <<<<<WARNING - NOT THE PRETTIEST WAY TO DO THIS! */

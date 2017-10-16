@@ -7,7 +7,7 @@
 void pcap_callback(u_char *user, const struct  pcap_pkthdr *h, const u_char *bytes)
 {
 	struct configuration *conf_data = (struct configuration *) user;
-
+	
 	// Ensuring that the package was completely captured
 	if ((h->caplen) == (h->len)){
 		

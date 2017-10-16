@@ -1,9 +1,10 @@
+#include <pcap/pcap.h>
+#include <arpa/inet.h>
+#include "conf-data.h"
+
 #ifndef HANDLERS_H_
 
 	#define HANDLERS_H_ 
-	#include <pcap/pcap.h>
-	#include <arpa/inet.h>
-	#include "conf-data.h"
 
 	void pcap_callback(u_char *user, const struct  pcap_pkthdr *h, const u_char *bytes);
 	int ether_handler(const u_char *bytes, bpf_u_int32 total_len, struct configuration *conf_data);

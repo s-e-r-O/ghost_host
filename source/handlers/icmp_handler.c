@@ -22,7 +22,6 @@ int icmp_handler(const u_char *bytes, u_int16_t total_len, struct configuration 
 			The echo reply has to have the same data on it (echo :v) 
 		*/
   		u_char *data = (u_char *) (bytes + sizeof(*headerICMP));
-  		printf("total_len(%u) - header_size(%u) = %u\n", total_len, sizeof(*headerICMP), total_len - sizeof(*headerICMP));
   		printf("Sending an ICMP Echo Reply: ");
   		extern libnet_ptag_t icmp_tag;
   		icmp_tag = libnet_build_icmpv4_echo(	ICMP_ECHOREPLY, 0, 0, 					// Type, Code, Checksum
