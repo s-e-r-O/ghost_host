@@ -17,14 +17,14 @@ int ip_handler(const u_char *bytes, struct configuration *conf_data)
 	int send = icmp_handler(bytes + headerIP -> ip_hl * 4, ntohs(headerIP->ip_len) - headerIP -> ip_hl * 4, conf_data);
     
     if (send){
-		extern libnet_ptag_t ip_tag;
-		ip_tag = libnet_build_ipv4(	ntohs(headerIP->ip_len),  			// Total Packet Length (from IP POV)
-									0, 0, 0, 							// TOS, ID, Fragmentation flags and offset
-									64, IPPROTO_ICMP, 0, 				// TTL, Protocol, Checksum
-									conf_data->ghost_host.ip_addr, 		// Source IP Address
-									*(u_int32_t *)&headerIP->ip_src, 	// Destination IP Address
-									NULL, 0, 							// Payload (not considered in this layer), Payload Length
-									conf_data->l, ip_tag);				// libnet_t pointer, libnet tag of this specific IP header
+		*(conf_data->libnet_tags.ip_tag) = 
+				libnet_build_ipv4(	ntohs(headerIP->ip_len),  							// Total Packet Length (from IP POV)
+									0, 0, 0, 											// TOS, ID, Fragmentation flags and offset
+									64, IPPROTO_ICMP, 0, 								// TTL, Protocol, Checksum
+									conf_data->ghost_host.ip_addr, 						// Source IP Address
+									*(u_int32_t *)&headerIP->ip_src, 					// Destination IP Address
+									NULL, 0, 											// Payload (not considered in this layer), Payload Length
+									conf_data->l, *(conf_data->libnet_tags.ip_tag));	// libnet_t pointer, libnet tag of this specific IP header
 
 		/*
 			Auto-build is a simpler way to achieve packet injection, but it uses the device's real IP Address, instead

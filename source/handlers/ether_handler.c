@@ -31,11 +31,8 @@ int ether_handler(const u_char *bytes, bpf_u_int32 total_len, struct configurati
 				
 				last_ethertype = ETHERTYPE_IP;
 					
-				extern libnet_ptag_t ether_tag;
-				ether_tag = LIBNET_PTAG_INITIALIZER;
-					
-				extern libnet_ptag_t arp_tag;
-				arp_tag = LIBNET_PTAG_INITIALIZER;
+				*(conf_data->libnet_tags.ether_tag) = LIBNET_PTAG_INITIALIZER;
+				*(conf_data->libnet_tags.arp_tag) = LIBNET_PTAG_INITIALIZER;
 			}
 			/* NOT THE PRETTIEST WAY TO DO THIS! - WARNING>>>>>> */
 				
@@ -54,14 +51,9 @@ int ether_handler(const u_char *bytes, bpf_u_int32 total_len, struct configurati
 				libnet_clear_packet(conf_data->l);
 				last_ethertype = ETHERTYPE_ARP;
 
-				extern libnet_ptag_t ether_tag;
-				ether_tag = LIBNET_PTAG_INITIALIZER;
-				
-				extern libnet_ptag_t ip_tag;
-				ip_tag = LIBNET_PTAG_INITIALIZER;
-				
-				extern libnet_ptag_t icmp_tag;
-				icmp_tag = LIBNET_PTAG_INITIALIZER;
+				*(conf_data->libnet_tags.ether_tag) = LIBNET_PTAG_INITIALIZER;
+				*(conf_data->libnet_tags.ip_tag) = LIBNET_PTAG_INITIALIZER;
+				*(conf_data->libnet_tags.icmp_tag) = LIBNET_PTAG_INITIALIZER;
 			}
 			/* NOT THE PRETTIEST WAY TO DO THIS! - WARNING>>>>>> */
 
@@ -72,12 +64,12 @@ int ether_handler(const u_char *bytes, bpf_u_int32 total_len, struct configurati
 
 	if (send){
 
-		extern libnet_ptag_t ether_tag;
-		ether_tag = libnet_build_ethernet(	headerEthernet->ether_shost, 			// Destination MAC Address 
-											conf_data->ghost_host.hrd_addr, 		// Source MAC Address
-											ntohs(headerEthernet->ether_type), 		// Ethertype
-											NULL, 0,								// Payload (not considered in this layer), Payload Length
-											conf_data->l, ether_tag);				// libnet_t pointer, libnet tag of this specific Ethernet header
+		*(conf_data->libnet_tags.ether_tag) = 
+					libnet_build_ethernet(	headerEthernet->ether_shost, 						// Destination MAC Address 
+											conf_data->ghost_host.hrd_addr, 					// Source MAC Address
+											ntohs(headerEthernet->ether_type), 					// Ethertype
+											NULL, 0,											// Payload (not considered in this layer), Payload Length
+											conf_data->l, *(conf_data->libnet_tags.ether_tag));	// libnet_t pointer, libnet tag of this specific Ethernet header
 		
 		/*
 			Auto-build is a simpler way to achieve packet injection, but it uses the device's real MAC address, instead

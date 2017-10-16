@@ -39,16 +39,16 @@ int arp_handler(const u_char *bytes, bpf_u_int32 total_len, struct configuration
 			printf("Received an ARP request for our ghost IP.\n");
 
 			printf("Sending an ARP reply: ");
-			extern libnet_ptag_t arp_tag;
-			arp_tag = libnet_build_arp(	ARPHRD_ETHER, ETHERTYPE_IP, 					// Hardware Type, Protocol Type
-										headerARP->ar_hln, headerARP->ar_pln, 			// Hardware Address Length, Protocol Address Length
-										ARPOP_REPLY, 									// Operation
-										conf_data->ghost_host.hrd_addr, 				// Source Hardware Address
-										(u_int8_t *) &conf_data->ghost_host.ip_addr, 	// Source IP Address (Protocol Address)
-										payloadARP->ar_sha, 							// Target Hardware Address
-										payloadARP->ar_sip, 							// Target IP Address (Protocol Address)
-										NULL, 0, 										// Payload (not considered), Payload Length
-										conf_data->l, arp_tag);							// libnet_t pointer, libnet tag of this specific ARP header
+			*(conf_data->libnet_tags.arp_tag) = 
+					libnet_build_arp(	ARPHRD_ETHER, ETHERTYPE_IP, 						// Hardware Type, Protocol Type
+										headerARP->ar_hln, headerARP->ar_pln, 				// Hardware Address Length, Protocol Address Length
+										ARPOP_REPLY, 										// Operation
+										conf_data->ghost_host.hrd_addr, 					// Source Hardware Address
+										(u_int8_t *) &conf_data->ghost_host.ip_addr, 		// Source IP Address (Protocol Address)
+										payloadARP->ar_sha, 								// Target Hardware Address
+										payloadARP->ar_sip, 								// Target IP Address (Protocol Address)
+										NULL, 0, 											// Payload (not considered), Payload Length
+										conf_data->l, *(conf_data->libnet_tags.arp_tag));	// libnet_t pointer, libnet tag of this specific ARP header
 			
 			/*
 				ARP Build is almost the same as its Auto-build counterpart, 

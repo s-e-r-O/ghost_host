@@ -23,12 +23,12 @@ int icmp_handler(const u_char *bytes, u_int16_t total_len, struct configuration 
 		*/
   		u_char *data = (u_char *) (bytes + sizeof(*headerICMP));
   		printf("Sending an ICMP Echo Reply: ");
-  		extern libnet_ptag_t icmp_tag;
-  		icmp_tag = libnet_build_icmpv4_echo(	ICMP_ECHOREPLY, 0, 0, 					// Type, Code, Checksum
-        										ntohs(headerICMP->un.echo.id),			// Identification number
-        										ntohs(headerICMP->un.echo.sequence),	// Packet sequence number
-        										data, total_len - sizeof(*headerICMP),	// Payload, Payload Length
-        										conf_data->l, icmp_tag);				// libnet_t pointer, libnet tag of this specific ICMP header
+  		*(conf_data->libnet_tags.icmp_tag) = 
+                        libnet_build_icmpv4_echo(	ICMP_ECHOREPLY, 0, 0, 					             // Type, Code, Checksum
+        										    ntohs(headerICMP->un.echo.id),			             // Identification number
+        										    ntohs(headerICMP->un.echo.sequence),	             // Packet sequence number
+        										    data, total_len - sizeof(*headerICMP),	             // Payload, Payload Length
+        										    conf_data->l, *(conf_data->libnet_tags.icmp_tag));	 // libnet_t pointer, libnet tag of this specific ICMP header
   		// 'send' is finally true :D
   		send = 1;
 
