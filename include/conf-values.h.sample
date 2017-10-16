@@ -1,6 +1,9 @@
 // Copy this file as conf-values.h with the values specified for your configuration
 // DO NOT post this file in the git respository
-
-#define CONF_DEVICE "wlan0"
-#define GHOST_IP_ADDR "192.168.0.240"
-#define GHOST_HRD_ADDR "AA:BB:CC:DD:EE:FF"
+#ifndef CONF_VALUES_H_
+	#define CONF_VALUES_H_
+	
+	#define CONF_DEVICE "eth0" 					// Interface (or device) in which libpcap and libnet will operate on
+	#define GHOST_IP_ADDR "169.254.247.240" 	// Remember that the IP has to be in the same net as requesting hosts.
+	#define GHOST_HRD_ADDR "BB:CC:00:DD:EE:FF" 	// Be careful not to repeat MAC Address in the same net (what are the chances?)
+#endif
