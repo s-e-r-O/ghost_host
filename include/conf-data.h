@@ -1,5 +1,6 @@
-#ifndef CONF_H_
-#define CONF_H_
+#ifndef CONF_DATA_H_
+	#define CONF_DATA_H_
+
 	#include <pcap/pcap.h>
 	#include <libnet.h>
 
