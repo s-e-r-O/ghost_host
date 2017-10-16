@@ -5,19 +5,13 @@
 #include <netinet/in.h>
 
 #include "recv.h"
-
+#include "conf-data.h"
 /* RFC826 -> https://tools.ietf.org/html/rfc826 */
 
-struct arppld
+int arp_reader(const u_char *bytes, bpf_u_int32 total_len, struct configuration *conf_data)
 {
-	struct ether_addr ar_sha;   	/* Sender hardware address.  */
-	struct in_addr ar_sip;          /* Sender IP address.  */
-	struct ether_addr ar_tha;   	/* Target hardware address.  */
-	struct in_addr ar_tip;          /* Target IP address.  */
-};
+	int send = 0;
 
-void arp_reader(const u_char *bytes, bpf_u_int32 total_len)
-{
 	struct arphdr *headerARP = (struct arphdr *) bytes;
 
 	struct arppld
@@ -30,36 +24,24 @@ void arp_reader(const u_char *bytes, bpf_u_int32 total_len)
 	
 	struct arppld *payloadARP = (struct arppld *) (bytes + sizeof (*headerARP));
 
-	switch(ntohs(headerARP->ar_op)){
-		case ARPOP_REQUEST:
-			printf("Who has %s? ", inet_ntoa(*(struct in_addr*) payloadARP->ar_tip));
-			printf("Tell %s\n", inet_ntoa(*(struct in_addr*) payloadARP->ar_sip));
+	if (ntohs(headerARP->ar_op) == ARPOP_REQUEST){
+		/*printf("Who has %s? ", inet_ntoa(*(struct in_addr*) payloadARP->ar_tip));
+		printf("Tell %s\n", inet_ntoa(*(struct in_addr*) payloadARP->ar_sip));*/
 
-			// TO-DO: Find a way to make "ghost host address" from main.c reach this point in execution
-			/* 
-				0x0A1EFEA9 = 10.30.254.169 (For tests purposes only)
-		
-				For some reason, the *(uint32_t *) cast inverts the original address (169.254.30.10).
-				Anyways, this is only for tests purposes.
-			*/
-
-			if (*(uint32_t *)payloadARP->ar_tip == 0x0A1EFEA9) {
-				// Someone is asking for our ghost host
-				printf("Someone is asking for our ghost host\n");
-			}
-
-			break;
-		case ARPOP_REPLY:
-			printf("%s is at ", inet_ntoa(*(struct in_addr*) payloadARP->ar_sip));
-			printf("%s\n", ether_ntoa((struct ether_addr*) payloadARP->ar_sha));
-			break;
+		if (*(uint32_t *)payloadARP->ar_tip == conf_data->ghost_host.ip_addr) {
+			// Someone is asking for our ghost host
+			printf("Someone is asking for our ghost host\n");
+			extern libnet_ptag_t arp_tag;
+			arp_tag = libnet_build_arp(ARPHRD_ETHER, ETHERTYPE_IP, headerARP->ar_hln, headerARP->ar_pln \
+						, ARPOP_REPLY, conf_data->ghost_host.hrd_addr, \
+						(u_int8_t *) &conf_data->ghost_host.ip_addr, \
+						payloadARP->ar_sha, payloadARP->ar_sip, NULL, 0, conf_data->l, arp_tag);
+			
+			//libnet_autobuild_arp(ARPOP_REPLY, conf_data->ghost_host.hrd_addr, (u_int8_t *) &conf_data->ghost_host.ip_addr, \
+			//			payloadARP->ar_sha, payloadARP->ar_sip, conf_data->l);
+			
+			send = 1;
+		}
 	}
-	
-	/*
-	printf("Sender Hardware Address: %s\n", ether_ntoa((struct ether_addr*) payloadARP->ar_sha));
-	printf("Sender IP Address: %s\n", inet_ntoa(*(struct in_addr*) payloadARP->ar_sip));
-	printf("Target Hardware Address: %s\n", ether_ntoa((struct ether_addr*) payloadARP->ar_tha));
-	printf("Target IP Address: %s\n", inet_ntoa(*(struct in_addr*) payloadARP->ar_tip));
-	*/
-	
+	return send;
 }
